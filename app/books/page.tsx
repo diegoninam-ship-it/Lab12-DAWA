@@ -95,17 +95,17 @@ export default function BooksPage() {
   };
 
   const fetchAllBooksForGenres = async () => {
-    try {
-      const response = await fetch('/api/books');
-      if (response.ok) {
-        const data = await response.json();
-        const uniqueGenres = [...new Set(data.map((book: Book) => book.genre))];
-        setGenres(uniqueGenres);
-      }
-    } catch (error) {
-      console.error('Error al cargar géneros:', error);
+  try {
+    const response = await fetch('/api/books');
+    if (response.ok) {
+      const data: Book[] = await response.json();
+      const uniqueGenres: string[] = [...new Set(data.map((book) => book.genre))];
+      setGenres(uniqueGenres);
     }
-  };
+  } catch (error) {
+    console.error('Error al cargar géneros:', error);
+  }
+};
 
   const fetchBooks = async () => {
     setLoading(true);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 interface Author {
@@ -35,7 +35,8 @@ interface Stats {
   shortestBook: { title: string; pages: number } | null;
 }
 
-export default function AuthorDetailPage() {
+// 👉 Componente interno que usa los hooks dinámicos
+function AuthorDetailContent() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -198,52 +199,14 @@ export default function AuthorDetailPage() {
           <div className="bg-white rounded-lg shadow-lg p-6 mb-8 border-l-4 border-yellow-500">
             <h2 className="text-xl font-bold mb-4">Editar Información del Autor</h2>
             <form onSubmit={handleEditAuthor} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Nombre"
-                required
-                value={editFormData.name}
-                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500"
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                value={editFormData.email}
-                onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500"
-              />
-              <input
-                type="text"
-                placeholder="Nacionalidad"
-                required
-                value={editFormData.nationality}
-                onChange={(e) => setEditFormData({ ...editFormData, nationality: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500"
-              />
-              <input
-                type="number"
-                placeholder="Año de Nacimiento"
-                required
-                value={editFormData.birthYear}
-                onChange={(e) => setEditFormData({ ...editFormData, birthYear: e.target.value })}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500"
-              />
-              <textarea
-                placeholder="Biografía"
-                value={editFormData.bio}
-                onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })}
-                className="md:col-span-2 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500"
-                rows={3}
-              />
+              <input type="text" placeholder="Nombre" required value={editFormData.name} onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" />
+              <input type="email" placeholder="Email" required value={editFormData.email} onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" />
+              <input type="text" placeholder="Nacionalidad" required value={editFormData.nationality} onChange={(e) => setEditFormData({ ...editFormData, nationality: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" />
+              <input type="number" placeholder="Año de Nacimiento" required value={editFormData.birthYear} onChange={(e) => setEditFormData({ ...editFormData, birthYear: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" />
+              <textarea placeholder="Biografía" value={editFormData.bio} onChange={(e) => setEditFormData({ ...editFormData, bio: e.target.value })} className="md:col-span-2 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500" rows={3} />
               <div className="md:col-span-2 flex gap-3">
-                <button type="submit" className="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors font-medium">
-                  Guardar Cambios
-                </button>
-                <button type="button" onClick={() => setShowEditForm(false)} className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium">
-                  Cancelar
-                </button>
+                <button type="submit" className="bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition-colors font-medium">Guardar Cambios</button>
+                <button type="button" onClick={() => setShowEditForm(false)} className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium">Cancelar</button>
               </div>
             </form>
           </div>
@@ -281,27 +244,19 @@ export default function AuthorDetailPage() {
                 <p className="text-sm text-gray-500">{stats.latestBook?.year || ''}</p>
               </div>
             </div>
-            
-            {/* Géneros y Libros Extremos */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Géneros que escribe</h3>
                 <div className="flex flex-wrap gap-2">
                   {stats.genres.map((g, i) => (
-                    <span key={i} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
-                      {g}
-                    </span>
+                    <span key={i} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">{g}</span>
                   ))}
                 </div>
               </div>
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Libro más largo / más corto</h3>
-                <p className="text-sm text-gray-700">
-                  📗 <strong>Más largo:</strong> {stats.longestBook?.title} ({stats.longestBook?.pages} págs)
-                </p>
-                <p className="text-sm text-gray-700 mt-1">
-                  📕 <strong>Más corto:</strong> {stats.shortestBook?.title} ({stats.shortestBook?.pages} págs)
-                </p>
+                <p className="text-sm text-gray-700">📗 <strong>Más largo:</strong> {stats.longestBook?.title} ({stats.longestBook?.pages} págs)</p>
+                <p className="text-sm text-gray-700 mt-1">📕 <strong>Más corto:</strong> {stats.shortestBook?.title} ({stats.shortestBook?.pages} págs)</p>
               </div>
             </div>
           </div>
@@ -311,83 +266,31 @@ export default function AuthorDetailPage() {
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <h2 className="text-xl font-bold text-gray-900">Obras Publicadas ({books.length})</h2>
-            <button
-              onClick={() => setShowAddBookForm(!showAddBookForm)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-            >
+            <button onClick={() => setShowAddBookForm(!showAddBookForm)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
               + Agregar Nuevo Libro
             </button>
           </div>
 
-          {/* Formulario para agregar libro */}
           {showAddBookForm && (
             <div className="p-6 bg-blue-50 border-b border-gray-200">
               <h3 className="text-lg font-semibold mb-4">Nuevo libro para {author.name}</h3>
               <form onSubmit={handleAddBook} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="Título *"
-                  required
-                  value={newBookData.title}
-                  onChange={(e) => setNewBookData({ ...newBookData, title: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  placeholder="ISBN *"
-                  required
-                  value={newBookData.isbn}
-                  onChange={(e) => setNewBookData({ ...newBookData, isbn: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="number"
-                  placeholder="Año de Publicación *"
-                  required
-                  value={newBookData.publishedYear}
-                  onChange={(e) => setNewBookData({ ...newBookData, publishedYear: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Género *"
-                  required
-                  value={newBookData.genre}
-                  onChange={(e) => setNewBookData({ ...newBookData, genre: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="number"
-                  placeholder="Número de Páginas *"
-                  required
-                  value={newBookData.pages}
-                  onChange={(e) => setNewBookData({ ...newBookData, pages: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Descripción (opcional)"
-                  value={newBookData.description}
-                  onChange={(e) => setNewBookData({ ...newBookData, description: e.target.value })}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 md:col-span-2"
-                />
+                <input type="text" placeholder="Título *" required value={newBookData.title} onChange={(e) => setNewBookData({ ...newBookData, title: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+                <input type="text" placeholder="ISBN *" required value={newBookData.isbn} onChange={(e) => setNewBookData({ ...newBookData, isbn: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+                <input type="number" placeholder="Año de Publicación *" required value={newBookData.publishedYear} onChange={(e) => setNewBookData({ ...newBookData, publishedYear: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+                <input type="text" placeholder="Género *" required value={newBookData.genre} onChange={(e) => setNewBookData({ ...newBookData, genre: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+                <input type="number" placeholder="Número de Páginas *" required value={newBookData.pages} onChange={(e) => setNewBookData({ ...newBookData, pages: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+                <input type="text" placeholder="Descripción (opcional)" value={newBookData.description} onChange={(e) => setNewBookData({ ...newBookData, description: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 md:col-span-2" />
                 <div className="md:col-span-2 flex gap-3">
-                  <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                    Guardar Libro
-                  </button>
-                  <button type="button" onClick={() => setShowAddBookForm(false)} className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium">
-                    Cancelar
-                  </button>
+                  <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">Guardar Libro</button>
+                  <button type="button" onClick={() => setShowAddBookForm(false)} className="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400 transition-colors font-medium">Cancelar</button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* Lista de Libros */}
           {books.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              Este autor aún no tiene libros registrados. ¡Agrega el primero!
-            </div>
+            <div className="p-8 text-center text-gray-500">Este autor aún no tiene libros registrados. ¡Agrega el primero!</div>
           ) : (
             <div className="divide-y divide-gray-200">
               {books.map((book) => (
@@ -401,9 +304,7 @@ export default function AuthorDetailPage() {
                         <span>📄 {book.pages} páginas</span>
                         <span>🔖 ISBN: {book.isbn}</span>
                       </div>
-                      {book.description && (
-                        <p className="text-sm text-gray-600 mt-2 italic">{book.description}</p>
-                      )}
+                      {book.description && <p className="text-sm text-gray-600 mt-2 italic">{book.description}</p>}
                     </div>
                   </div>
                 </div>
@@ -413,5 +314,18 @@ export default function AuthorDetailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 👉 Componente principal que envuelve todo en Suspense
+export default function AuthorDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl text-gray-600">Cargando detalles del autor...</div>
+      </div>
+    }>
+      <AuthorDetailContent />
+    </Suspense>
   );
 }
